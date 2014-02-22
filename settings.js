@@ -49,7 +49,6 @@
 		// Returns true if we don't think the normal settings
 		// screen pop-up can be scrolled correctly by the
 		// browser.
-
 		// Check if we're on Android
 		if (navigator.userAgent.match(/^Mozilla[^(]+\(Linux; U; Android[^)]*\).*Mobile Safari/)) {
 			// Make sure we only match the stock browser, not Chrome
@@ -429,6 +428,7 @@
 		}
 	});
 
+
 	// Deprecated stuff
 	function depwarn(fn, name) {
 		return function deprunner() {
@@ -453,9 +453,9 @@
 	exports.bindPropCheckbox = depwarn(bindCheckbox, "bindPropCheckbox");
 })(window.settings||(window.settings={}));
 
-settings.newSection('pagestyle', 'Page Formatting', 1);
-settings.newSection('mod', 'Moderation', 1.5, true);
+//settings.newSection('pagestyle', 'Page Formatting', 1);
+//settings.newSection('mod', 'Moderation', 1.5, true);
 settings.newSection('links', 'Link Behavior', 2);
 settings.newSection('posting', 'Posting', 3);
-settings.newSection('reloader', 'Thread Auto-Updater', 4);
-settings.newSection('filters', 'Filters', 5);
+//settings.newSection('reloader', 'Thread Auto-Updater', 4);
+//settings.newSection('filters', 'Filters', 5);

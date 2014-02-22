@@ -8,9 +8,16 @@
  *
  */
 
+
 settings.newSetting("use_QR", "bool", false, "Use Quick Reply dialog for posting", 'posting', {moredetails:"Lets you post without refreshing the page. Q is the quick keyboard shortcut.", orderhint:1});
 settings.newSetting("QR_persistent", "bool", false, "Persistent QR (Don't close after posting)", 'posting', {orderhint:2});
 settings.newSetting("QR_flexstyle", "bool", true, "Use small persona fields on QR", 'posting', {orderhint:3});
+
+
+//var settings = new script_settings('qr');
+
+
+//use_qr = true;
 
 $(document).ready(function(){
 	var useFile = typeof FileReader != "undefined" && !!FileReader;
@@ -221,16 +228,6 @@ $(document).ready(function(){
 		.attr("for", "qrspoiler")
 		.prepend($spoiler)
 		.appendTo($row);
-	var $mature = $("<input/>")
-		.attr("id", "qrmature")
-		.attr("type", "checkbox")
-		.attr("name", "mature");
-	var $maturelabel = $("<label/>")
-		.text("Mature Content")
-		.attr("id", "qrmaturelabel")
-		.attr("for", "qrmature")
-		.prepend($mature)
-		.appendTo($row);
 	var $auto = $("<input/>")
 		.attr("id", "qrauto")
 		.attr("type", "checkbox")
@@ -293,13 +290,6 @@ $(document).ready(function(){
 	if( $oldForm.find("#sticky").length == 0 ) {
 		$stickylabel.remove();
 	}
-	function init_mature_button() {
-		if( $oldForm.find("#mature").length == 0 || !settings.getSetting("show_mature") )
-			$maturelabel.hide();
-		else
-			$maturelabel.show();
-	}
-	init_mature_button();
 	
 	var QRInputNames = {};
 	$("input, textarea", $QRForm).each(function() {
@@ -908,7 +898,7 @@ $(document).ready(function(){
 		}
 		
 		data.append("post", $submit.val());
-		data.append("wantjson", 1);
+		data.append("json_response", 1);
 		if (selectedreply.file) {
 			if (selectedreply.filethumb && !selectedreply.filethumb.isRejected() && !$spoiler.is(':checked')) {
 				if (selectedreply.filethumb.isPending()) {
@@ -983,9 +973,9 @@ $(document).ready(function(){
 			success: function(data) {
 				query = null;
 				setQRFormDisabled(false);
-				if (data.status == 'success') {
+				if (data.error == null) {
 					QRcooldown(10);
-					if (settings.getSetting("QR_persistent") || (replies.length > 1))
+					if (settings.getSetting('QR_persistent') || (replies.length > 1))
 						QR.clear();
 					else
 						QR.close();
@@ -993,14 +983,14 @@ $(document).ready(function(){
 					selectedreply.rm();
 					
 					$(document).trigger('post_submitted', {
-						postid: data.postid,
-						threadid: data.threadid,
-						board: data.board,
-						url: data.url
+						postid: data.id,
+						//threadid: data.threadid,
+						//board: data.board,
+						url: data.redirect
 					});
 					
 					if (data.threadid == null) {
-						window.location.href = data.url;
+						window.location.href = data.redirect;
 					} else {
 						setTimeout(reloader.updateThreadNow, 10, true);
 					}
@@ -1011,7 +1001,7 @@ $(document).ready(function(){
 						var pageState = {title: 'Ban', banpage: data.banhtml};
 						state.newState(pageState);
 					} else {
-						$QRwarning.text('Unknown error: '+data.error);
+						$QRwarning.text('error: '+data.error);
 					}
 					prepSubmitButton();
 				}
@@ -1032,14 +1022,14 @@ $(document).ready(function(){
 	}
 
 	function QRInit() {
-		use_QR = settings.getSetting("use_QR");
+		use_QR = settings.getSetting('use_QR');
 		if (use_QR) {
 			$oldForm.hide();
 			$QRButtonDiv.show();
 			citeReply = qrCiteReply;
 			if($captchaPuzzle.length)
 				stealCaptcha();
-			if (settings.getSetting("QR_persistent"))
+			if (settings.getSetting('QR_persistent'))
 				QR.open();
 		} else {
 			QR.close();
@@ -1050,7 +1040,7 @@ $(document).ready(function(){
 	}
 	
 	function init_flexstyle() {
-		if (settings.getSetting("QR_flexstyle")) {
+		if (settings.getSetting('QR_flexstyle')) {
 			$persona.addClass("useflexstyle");
 		} else {
 			$persona.removeClass("useflexstyle");
@@ -1062,9 +1052,5 @@ $(document).ready(function(){
 	$(document).on("setting_change", function(e, setting) {
 		if (setting == "use_QR")
 			QRInit();
-		else if (setting == "show_mature")
-			init_mature_button();
-		else if (setting == "QR_flexstyle")
-			init_flexstyle();
 	});
 });
